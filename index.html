@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kindred-style PFP — Stickers Panel · showshow(@wshowshow)</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Kindred-style PFP — <span class="sub">Stickers · Made by showshow(@wshowshow)</span></h1>
+    <button id="toggleStickers" class="btn ghost">스티커 열기 / Stickers</button>
+  </header>
+
+  <main>
+    <section class="canvas-wrap">
+      <canvas id="pfp" width="500" height="500"></canvas>
+      <p class="hint">편집 중에는 원 바깥도 보입니다. 다운로드 시 동그랗게 잘려요. (During edit, outside the circle is visible. It will crop to a circle on download.)</p>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <label class="btn muted">프레임: 고정 (Fixed Frame: ring.png)</label>
+        <label class="btn">
+          콘텐츠 이미지 추가 (Add Base Image)
+          <input id="imgInput" type="file" accept="image/png,image/jpeg" hidden />
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="lockBaseBtn" class="btn">콘텐츠 잠금/해제 (Lock/Unlock Base)</button>
+        <button id="deleteBtn" class="btn outline" disabled>선택 삭제 (Delete Selected)</button>
+      </div>
+
+      <div class="row">
+        <button id="resetBaseBtn" class="btn secondary">콘텐츠 초기화 (Reset Base)</button>
+        <button id="resetStickersBtn" class="btn secondary">스티커 초기화 (Reset Stickers)</button>
+      </div>
+
+      <div class="row">
+        <button id="downloadBtn" class="btn primary grow">PNG 다운로드 (Download PNG · 500×500)</button>
+      </div>
+
+      <div class="creator">
+        <a class="btn link" href="https://x.com/wshowshow" target="_blank" rel="noopener noreferrer">
+          제작자 링크 (X Profile)
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Slide-over Sticker Drawer -->
+  <aside id="stickerDrawer" class="drawer">
+    <div class="drawer-header">
+      <h2>스티커 (Stickers)</h2>
+      <button id="closeDrawer" class="btn ghost sm">닫기 (Close)</button>
+    </div>
+    <div class="drawer-content">
+      <h3>모자 (Hats)</h3>
+      <div class="thumbs" id="hatThumbs"></div>
+      <h3>안경 (Glasses)</h3>
+      <div class="thumbs" id="glassesThumbs"></div>
+      <h3>기타 (Others)</h3>
+      <div class="thumbs" id="othersThumbs"></div>
+    </div>
+  </aside>
+
+  <div id="scrim" class="scrim"></div>
+
+  <footer><small>© showshow (@wshowshow)</small></footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
