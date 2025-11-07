@@ -1,81 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kindred-style PFP — Final</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kindred-style PFP · Stickers FIX · showshow(@wshowshow)</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <h1>Kindred-style PFP — Final</h1>
-    <p class="sub">Made by showshow (@wshowshow)</p>
+    <h1>Kindred-style PFP <span class="sub">— Stickers FIX</span></h1>
+    <nav class="actions">
+      <button id="toggleStickers" class="btn ghost">스티커 열기 (Open Stickers)</button>
+      <a class="btn link" target="_blank" href="https://x.com/wshowshow">제작자 링크 (X: @wshowshow)</a>
+    </nav>
   </header>
 
-  <main class="wrap">
-    <section class="stage">
+  <main>
+    <section class="canvas-wrap">
       <canvas id="pfp" width="500" height="500"></canvas>
-      <p class="hint">다운로드는 500×500 투명 PNG로 저장됩니다.</p>
+      <p class="hint">프레임은 기본 잠금. 필요 시 ‘링 잠금 해제’ 버튼을 사용하세요.</p>
     </section>
 
-    <aside class="panel">
-      <div class="group">
-        <label class="label">콘텐츠 이미지 (Base)</label>
-        <input id="imgInput" type="file" accept="image/*" />
-        <div class="row">
-          <button id="deleteBtn" class="btn danger" disabled>선택 삭제 (Delete)</button>
-          <button id="resetBaseBtn" class="btn">기본이미지 초기화 (Reset Base)</button>
-          <button id="lockBaseBtn" class="btn ghost">기본이미지 잠금/해제 (Lock/Unlock Base)</button>
-        </div>
+    <section class="panel">
+      <div class="row">
+        <label class="btn">
+          콘텐츠 이미지 추가 (Add Base Image)
+          <input id="imgInput" type="file" accept="image/png,image/jpeg" hidden />
+        </label>
+        <button id="lockBaseBtn" class="btn">콘텐츠 잠금/해제</button>
+        <button id="deleteBtn" class="btn outline" disabled>선택 삭제</button>
       </div>
 
-      <div class="group">
-        <label class="label">링 (Ring)</label>
-        <div class="row">
-          <button id="showRingBtn" class="btn secondary">링 보이기 (Show Ring)</button>
-          <span class="note">※ 링은 기본 표시, 이동/회전/크기 조절 불가. 삭제는 가능.</span>
-        </div>
+      <div class="row">
+        <button id="resetBaseBtn" class="btn secondary">콘텐츠 초기화</button>
+        <button id="resetStickersBtn" class="btn secondary">스티커 초기화</button>
       </div>
 
-      <div class="group">
-        <label class="label">스티커 (Stickers)</label>
-        <button id="toggleStickers" class="btn full">스티커 열기 (Open Stickers)</button>
-        <button id="resetStickersBtn" class="btn ghost full">스티커 모두 제거 (Clear)</button>
+      <div class="row">
+        <button id="unlockRingBtn" class="btn">링 잠금 해제 (Unlock Ring)</button>
+        <button id="resetRingBtn" class="btn secondary">링 초기화</button>
       </div>
 
-      <div class="group">
-        <button id="downloadBtn" class="btn primary full">PNG 다운로드 (500×500)</button>
+      <div class="row">
+        <button id="downloadBtn" class="btn primary grow">PNG 다운로드 (500×500)</button>
       </div>
-
-      <div class="group small">
-        <p>제작자 링크: <a href="https://x.com/wshowshow" target="_blank">@wshowshow</a></p>
-      </div>
-    </aside>
+    </section>
   </main>
 
-  <div id="scrim"></div>
-  <div id="stickerDrawer">
-    <div class="drawer-head">
-      <strong>스티커 선택 (Choose Stickers)</strong>
-      <button id="closeDrawer" class="btn ghost">닫기 (Close)</button>
+  <aside id="stickerDrawer" class="drawer">
+    <div class="drawer-header">
+      <h2>스티커 (Stickers)</h2>
+      <button id="closeDrawer" class="btn ghost sm">닫기 (Close)</button>
     </div>
-
-    <div class="drawer-sec">
+    <div class="drawer-content">
       <h3>모자 (Hats)</h3>
-      <div id="hatThumbs" class="thumbs"></div>
-    </div>
-
-    <div class="drawer-sec">
+      <div class="thumbs" id="hatThumbs"></div>
       <h3>안경 (Glasses)</h3>
-      <div id="glassesThumbs" class="thumbs"></div>
-    </div>
-
-    <div class="drawer-sec">
+      <div class="thumbs" id="glassesThumbs"></div>
       <h3>기타 (Others)</h3>
-      <div id="othersThumbs" class="thumbs"></div>
+      <div class="thumbs" id="othersThumbs"></div>
+      <p class="mini">썸네일이 비면 Console(F12)에서 404/에러를 확인하세요.</p>
     </div>
-  </div>
+  </aside>
+  <div id="scrim" class="scrim"></div>
+
+  <footer><small>© showshow (@wshowshow)</small></footer>
 
   <script src="app.js"></script>
 </body>
