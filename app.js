@@ -28,11 +28,35 @@ function initApp(){
   ['pfp','toggleStickers','closeDrawer','scrim','imgInput','deleteBtn','resetBaseBtn','resetStickersBtn','resetRingBtn','lockBaseBtn','unlockRingBtn','downloadBtn','hatThumbs','glassesThumbs','othersThumbs']
   .forEach(id => { if(!qs(id)) console.warn('Missing DOM node id=', id); });
 
-  canvas = new fabric.Canvas('pfp', { backgroundColor: 'transparent', selection: true, preserveObjectStacking: true });
+  canvas = new fabric.Canvas('pfp', {
+    backgroundColor: 'transparent',
+    selection: true,
+    preserveObjectStacking: true,
+    subTargetCheck: true            // ← 그룹 내부 객체 타겟팅 허용
+  });
 
-  baseGroup = new fabric.Group([], { selectable:false, evented:false, name:'BASE_GROUP', originX:'center', originY:'center', left:CENTER, top:CENTER });
-  stickerGroup = new fabric.Group([], { selectable:false, evented:false, name:'STICKER_GROUP', originX:'center', originY:'center', left:CENTER, top:CENTER });
-  canvas.add(baseGroup); canvas.add(stickerGroup);
+  // 그룹은 선택 잠금(selectable:false)이지만,
+  // 내부 객체를 집어넣고 조작할 수 있도록 evented:true + subTargetCheck:true
+  baseGroup = new fabric.Group([], {
+    selectable: false,
+    evented: true,                  // ← 이벤트 통과
+    subTargetCheck: true,           // ← 내부 객체 타겟팅
+    name: 'BASE_GROUP',
+    originX: 'center', originY: 'center',
+    left: CENTER, top: CENTER
+  });
+
+  stickerGroup = new fabric.Group([], {
+    selectable: false,
+    evented: true,                  // ← 이벤트 통과
+    subTargetCheck: true,           // ← 내부 객체 타겟팅
+    name: 'STICKER_GROUP',
+    originX: 'center', originY: 'center',
+    left: CENTER, top: CENTER
+  });
+
+  canvas.add(baseGroup);
+  canvas.add(stickerGroup);
 
   const clip = new fabric.Circle({ radius:RADIUS, originX:'center', originY:'center', left:CENTER, top:CENTER, absolutePositioned:true });
   baseGroup.set({ clipPath: clip });
@@ -92,13 +116,20 @@ function wireUi(){
 
   on(qs('lockBaseBtn'),'click', ()=>{
     baseLocked = !baseLocked; const base = baseGroup._objects[0];
-    if(base){ base.set({ selectable:!baseLocked, hasControls:!baseLocked }); canvas.discardActiveObject(); canvas.renderAll(); }
+    if(base){
+      base.set({ selectable:!baseLocked, hasControls:!baseLocked });
+      canvas.discardActiveObject(); canvas.renderAll();
+    }
   });
 
   on(qs('unlockRingBtn'),'click', ()=>{
     if(!frameImg) return;
     ringLocked=false;
-    frameImg.set({ selectable:true, hasControls:true, lockMovementX:false, lockMovementY:false, lockScalingX:false, lockScalingY:false, lockRotation:false });
+    frameImg.set({
+      selectable:true, hasControls:true,
+      lockMovementX:false, lockMovementY:false,
+      lockScalingX:false, lockScalingY:false, lockRotation:false
+    });
     canvas.setActiveObject(frameImg); canvas.renderAll();
   });
 
@@ -107,11 +138,17 @@ function wireUi(){
 
 function openDrawer(open){
   const d=qs('stickerDrawer'), s=qs('scrim');
-  if(open){ d.classList.add('open'); s.classList.add('show'); } else { d.classList.remove('open'); s.classList.remove('show'); }
+  if(open){ d.classList.add('open'); s.classList.add('show'); }
+  else { d.classList.remove('open'); s.classList.remove('show'); }
 }
 
 // ==== Helpers
-function clearGroup(g){ const items = g._objects.slice(); items.forEach(o=>g.remove(o)); canvas.discardActiveObject(); canvas.renderAll(); }
+function clearGroup(g){
+  const items = g._objects.slice();
+  items.forEach(o=>g.remove(o));
+  canvas.discardActiveObject(); canvas.renderAll();
+}
+
 function coverFit(obj){
   if(!obj.width||!obj.height) return;
   const scale = Math.max(DIAM/obj.width, DIAM/obj.height) * BLEED;
@@ -122,7 +159,12 @@ function coverFit(obj){
 function setBase(url){
   return new Promise(res=>{
     fabric.Image.fromURL(url, img => {
-      img.set({ originX:'center', originY:'center', left:CENTER, top:CENTER, cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false, hasControls:!baseLocked, selectable:!baseLocked });
+      img.set({
+        originX:'center', originY:'center', left:CENTER, top:CENTER,
+        cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false,
+        hasControls:!baseLocked, selectable:!baseLocked,
+        perPixelTargetFind:true            // ← 선택 감도 향상(선택사항)
+      });
       coverFit(img);
       clearGroup(baseGroup);
       baseGroup.addWithUpdate(img);
@@ -134,7 +176,12 @@ function setBase(url){
 function addSticker(url){
   return new Promise((res, rej)=>{
     fabric.Image.fromURL(url, img => {
-      img.set({ originX:'center', originY:'center', left:CENTER, top:CENTER, cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false });
+      img.set({
+        originX:'center', originY:'center', left:CENTER, top:CENTER,
+        cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false,
+        selectable:true, hasControls:true,
+        perPixelTargetFind:true            // ← 가장자리가 투명한 PNG 선택에 유리
+      });
       img.scaleToWidth(200);
       stickerGroup.addWithUpdate(img);
       canvas.setActiveObject(img); canvas.renderAll(); res();
