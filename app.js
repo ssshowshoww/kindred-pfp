@@ -93,7 +93,8 @@ function initApp(){
 }
 
 function loadRing(){
-  fabric.Image.fromURL('ring.png?v=6', img => {
+  // Absolute path for Vercel static hosting
+  fabric.Image.fromURL('/public/ring.png?v=1', img => {
     img.set({
       originX:'center', originY:'center', left:CENTER, top:CENTER,
       // Fixed: cannot move/scale/rotate, but selectable (so user can delete)
@@ -142,7 +143,7 @@ function clearStickers(){
 
 function coverFit(obj){
   if(!obj.width || !obj.height) return;
-  const scale = Math.max(DIAM/obj.width, DIAM/obj.height) * BLEED;
+  const scale = Math.max((RADIUS*2)/obj.width, (RADIUS*2)/obj.height) * BLEED;
   obj.set({ originX:'center', originY:'center', left:CENTER, top:CENTER });
   obj.scale(scale);
 }
@@ -195,10 +196,11 @@ function downloadPng(){
   if(sel) canvas.setActiveObject(sel);
 }
 
+// Absolute paths for public assets
 const STICKERS = {
-  hats:     [ "stickers/fedora.png" ],
-  glasses:  [ "stickers/glasses.png" ],
-  others:   [ "stickers/brooch.png", "stickers/mask.png", "stickers/tie.png", "stickers/bow.png" ]
+  hats:     [ "/public/stickers/fedora.png" ],
+  glasses:  [ "/public/stickers/glasses.png" ],
+  others:   [ "/public/stickers/brooch.png", "/public/stickers/mask.png", "/public/stickers/tie.png", "/public/stickers/bow.png" ]
 };
 
 function addThumb(containerId, url){
