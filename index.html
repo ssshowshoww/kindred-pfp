@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kindred — PFP & Sticker Studio</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- Fabric.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/fabric.min.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1>Kindred — PFP & Sticker Studio</h1>
+    <div class="mode-toggle">
+      <label><input type="radio" name="mode" value="pfp" checked /> PFP 모드</label>
+      <label><input type="radio" name="mode" value="sticker" /> 스티커 모드</label>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="left">
+      <div class="panel">
+        <h2>캔버스</h2>
+        <div id="canvas-wrap">
+          <canvas id="stage" width="500" height="500"></canvas>
+        </div>
+        <div class="row">
+          <button id="clearAll" class="danger">전체 초기화</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>내보내기</h2>
+        <div class="row">
+          <button id="exportPng">PNG 내보내기 (투명 배경)</button>
+          <button id="exportJpg">JPG 내보내기 (흰 배경)</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="panel">
+        <h2>베이스 이미지</h2>
+        <div class="row">
+          <input type="file" id="baseUpload" accept="image/*" />
+          <button id="removeBase">베이스 삭제</button>
+        </div>
+        <p class="hint">트위터 PFP로 쓸 이미지를 업로드하세요. (캔버스 500×500)</p>
+      </div>
+
+      <div class="panel">
+        <h2>링(frame)</h2>
+        <div class="row">
+          <button id="addRing">링 추가</button>
+          <button id="removeRing">링 삭제</button>
+        </div>
+        <p class="hint">링은 크기/이동/회전이 불가능합니다. 생성/삭제만 가능합니다.</p>
+      </div>
+
+      <div class="panel">
+        <h2>악세서리</h2>
+        <div class="row grid">
+          <button class="add-acc" data-name="bow">Bow</button>
+          <button class="add-acc" data-name="brooch">Brooch</button>
+          <button class="add-acc" data-name="fedora">Fedora</button>
+          <button class="add-acc" data-name="glasses">Glasses</button>
+          <button class="add-acc" data-name="mask">Mask</button>
+          <button class="add-acc" data-name="tie">Tie</button>
+        </div>
+        <p class="hint">assets/accessories 폴더에 PNG 파일을 넣어주세요. 파일명은 <code>bow.png</code> 같은 소문자 이름을 권장합니다.</p>
+        <div class="row">
+          <button id="deleteSelected">선택 삭제</button>
+          <button id="bringForward">한 칸 위로</button>
+          <button id="sendBackwards">한 칸 아래로</button>
+          <button id="flipX">좌우 반전</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Made by showshow • Kindred themed</span>
+    <a href="https://x.com/wshowshow" target="_blank" rel="noreferrer">@wshowshow</a>
+    <span>Made by showshow • Kindred themed</span>
+    <a href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a>
+  </footer>
+
+  <script src="./src/main.js"></script>
+</body>
+</html>
