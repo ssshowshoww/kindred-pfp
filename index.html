@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kindred-style PFP — Final</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Kindred-style PFP — Final</h1>
+    <p class="sub">Made by showshow (@wshowshow)</p>
+  </header>
+
+  <main class="wrap">
+    <section class="stage">
+      <canvas id="pfp" width="500" height="500"></canvas>
+      <p class="hint">다운로드는 500×500 투명 PNG로 저장됩니다.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <label class="label">콘텐츠 이미지 (Base)</label>
+        <input id="imgInput" type="file" accept="image/*" />
+        <div class="row">
+          <button id="deleteBtn" class="btn danger" disabled>선택 삭제 (Delete)</button>
+          <button id="resetBaseBtn" class="btn">기본이미지 초기화 (Reset Base)</button>
+          <button id="lockBaseBtn" class="btn ghost">기본이미지 잠금/해제 (Lock/Unlock Base)</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <label class="label">링 (Ring)</label>
+        <div class="row">
+          <button id="showRingBtn" class="btn secondary">링 보이기 (Show Ring)</button>
+          <span class="note">※ 링은 기본 표시, 이동/회전/크기 조절 불가. 삭제는 가능.</span>
+        </div>
+      </div>
+
+      <div class="group">
+        <label class="label">스티커 (Stickers)</label>
+        <button id="toggleStickers" class="btn full">스티커 열기 (Open Stickers)</button>
+        <button id="resetStickersBtn" class="btn ghost full">스티커 모두 제거 (Clear)</button>
+      </div>
+
+      <div class="group">
+        <button id="downloadBtn" class="btn primary full">PNG 다운로드 (500×500)</button>
+      </div>
+
+      <div class="group small">
+        <p>제작자 링크: <a href="https://x.com/wshowshow" target="_blank">@wshowshow</a></p>
+      </div>
+    </aside>
+  </main>
+
+  <div id="scrim"></div>
+  <div id="stickerDrawer">
+    <div class="drawer-head">
+      <strong>스티커 선택 (Choose Stickers)</strong>
+      <button id="closeDrawer" class="btn ghost">닫기 (Close)</button>
+    </div>
+
+    <div class="drawer-sec">
+      <h3>모자 (Hats)</h3>
+      <div id="hatThumbs" class="thumbs"></div>
+    </div>
+
+    <div class="drawer-sec">
+      <h3>안경 (Glasses)</h3>
+      <div id="glassesThumbs" class="thumbs"></div>
+    </div>
+
+    <div class="drawer-sec">
+      <h3>기타 (Others)</h3>
+      <div id="othersThumbs" class="thumbs"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
