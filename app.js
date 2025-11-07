@@ -19,14 +19,14 @@ function qs(id){ return document.getElementById(id); }
 function on(el, ev, fn){ el && el.addEventListener(ev, fn); }
 
 function initApp(){
-  // 👇 [추가] 캔버스 실제 픽셀 크기 지정 + 미리보기용 DOM 배경(내보내기에는 영향 없음)
+  // 캔버스 실제 픽셀 크기 지정 + 미리보기용 DOM 배경(다운로드 PNG는 투명 유지)
   const el = document.getElementById('pfp');
   el.width = CANVAS_SIZE;
   el.height = CANVAS_SIZE;
-  el.style.background = '#ffffff'; // 미리보기만 하양(내보내기 PNG는 투명 유지)
+  el.style.background = '#ffffff';
 
   canvas = new fabric.Canvas('pfp', {
-    backgroundColor: 'transparent', // PNG 투명 유지
+    backgroundColor: 'transparent',
     selection: true,
     preserveObjectStacking: true,
   });
@@ -42,10 +42,12 @@ function initApp(){
     originX: 'center', originY: 'center',
     selectable: false, evented: false
   });
-  baseGroup.set({ clipPath: clipCircle.clone() });
+  // clone 후 absolutePositioned 다시 지정(안 하면 클립 좌표가 0,0로 밀려 하얗게만 보임)
+  const cp = clipCircle.clone(); cp.absolutePositioned = true;
+  baseGroup.set({ clipPath: cp });
   canvas.add(baseGroup);
 
-  // Ring visible by default (fixed)
+  // 링을 기본 표시
   loadRing();
 
   const delBtn = qs('deleteBtn');
@@ -65,7 +67,7 @@ function initApp(){
   on(qs('deleteBtn'), 'click', ()=> {
     const act = canvas.getActiveObject(); if(!act) return;
 
-    if (act === frameImg) {                 // ring deletion allowed
+    if (act === frameImg) {
       canvas.remove(frameImg); frameImg = null;
     } else if (baseGroup && baseGroup.contains(act)) {
       if (baseLocked) return;
@@ -91,7 +93,6 @@ function initApp(){
     }
   });
 
-  // Ring restore (if deleted)
   on(qs('showRingBtn'), 'click', ()=> { if(!frameImg) loadRing(); });
 
   on(qs('downloadBtn'), 'click', downloadPng);
@@ -103,7 +104,6 @@ function loadRing(){
   fabric.Image.fromURL('ring.png?v=6', img => {
     img.set({
       originX:'center', originY:'center', left:CENTER, top:CENTER,
-      // Fixed: cannot move/scale/rotate, but selectable (so user can delete)
       selectable: true, hasControls: false,
       lockMovementX: true, lockMovementY: true,
       lockScalingX: true, lockScalingY: true,
@@ -157,6 +157,7 @@ function coverFit(obj){
 function setBase(url){
   return new Promise(res=>{
     fabric.Image.fromURL(url, img => {
+      console.log('base loaded', img?.width, img?.height);
       img.set({
         originX:'center', originY:'center', left:CENTER, top:CENTER,
         hasControls: !baseLocked, selectable: !baseLocked,
@@ -172,7 +173,7 @@ function setBase(url){
   });
 }
 
-// Stickers: free transform (move/rotate/scale), clipped to circle
+// 스티커: 원형 클립 적용(absolutePositioned 복원 필수)
 function addSticker(url){
   return new Promise(res=>{
     fabric.Image.fromURL(url, img => {
@@ -181,7 +182,8 @@ function addSticker(url){
         selectable: true, hasControls: true,
         cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false
       });
-      img.clipPath = clipCircle.clone();
+      const sp = clipCircle.clone(); sp.absolutePositioned = true;
+      img.clipPath = sp;
       img.scaleToWidth(200);
       stickers.push(img);
       canvas.add(img);
