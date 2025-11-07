@@ -1,220 +1,117 @@
-document.addEventListener('DOMContentLoaded', () => initApp());
+const SIZE=500, CENTER=250, RADIUS=240, INNER=220;
+let canvas, frameImg=null, baseGroup, baseLocked=false, stickers=[];
 
-const CANVAS_SIZE = 500;
-const CENTER = 250;
-const RADIUS = 240;
-const RING_INNER_RADIUS = 220;
-const DIAM = RADIUS * 2;
-const BLEED = 1.02;
+const $ = id=>document.getElementById(id);
 
-let canvas;
-let baseGroup;
-let stickers = [];
-let frameImg = null;
-let baseLocked = false;
-let clipCircle;
+document.addEventListener('DOMContentLoaded', init);
 
-function qs(id){ return document.getElementById(id); }
-function on(el, ev, fn){ el && el.addEventListener(ev, fn); }
+function init(){
+  canvas = new fabric.Canvas('c', { backgroundColor:'transparent', preserveObjectStacking:true });
 
-function initApp(){
-  canvas = new fabric.Canvas('pfp', {
-    backgroundColor: 'transparent',
-    selection: true,
-    preserveObjectStacking: true,
-  });
+  // circular clip for base & stickers
+  const clip = new fabric.Circle({ radius:RADIUS, left:CENTER, top:CENTER, originX:'center', originY:'center', absolutePositioned:true });
 
-  clipCircle = new fabric.Circle({
-    radius: RADIUS, left: CENTER, top: CENTER,
-    originX: 'center', originY: 'center',
-    absolutePositioned: true
-  });
-
-  baseGroup = new fabric.Group([], {
-    name: 'BASE_GROUP', left: CENTER, top: CENTER,
-    originX: 'center', originY: 'center',
-    selectable: false, evented: false
-  });
-  baseGroup.set({ clipPath: clipCircle.clone() });
+  baseGroup = new fabric.Group([], { left:CENTER, top:CENTER, originX:'center', originY:'center', selectable:false, evented:false, name:'BASE' });
+  baseGroup.clipPath = clip.clone();
   canvas.add(baseGroup);
 
-  // Ring visible by default (fixed)
-  loadRing();
+  // default ring
+  addRing();
 
-  const delBtn = qs('deleteBtn');
-  canvas.on('selection:created', e => delBtn.disabled = !(e.selected?.[0]));
-  canvas.on('selection:updated', e => delBtn.disabled = !(e.selected?.[0]));
-  canvas.on('selection:cleared', () => delBtn.disabled = true);
-
-  on(qs('toggleStickers'), 'click', ()=> openDrawer(true));
-  on(qs('closeDrawer'), 'click', ()=> openDrawer(false));
-  on(qs('scrim'), 'click', ()=> openDrawer(false));
-
-  on(qs('imgInput'), 'change', async e => {
+  // base handlers
+  $('baseInput').addEventListener('change', e=>{
     const f = e.target.files?.[0]; if(!f) return;
-    await setBase(URL.createObjectURL(f));
-  });
-
-  on(qs('deleteBtn'), 'click', ()=> {
-    const act = canvas.getActiveObject(); if(!act) return;
-
-    if (act === frameImg) {                 // ring deletion allowed
-      canvas.remove(frameImg); frameImg = null;
-    } else if (baseGroup && baseGroup.contains(act)) {
-      if (baseLocked) return;
-      baseGroup.remove(act);
-    } else {
-      const idx = stickers.indexOf(act);
-      if (idx >= 0) stickers.splice(idx,1);
-      canvas.remove(act);
-    }
-    canvas.discardActiveObject(); canvas.renderAll();
-    delBtn.disabled = true;
-  });
-
-  on(qs('resetBaseBtn'), 'click', ()=> clearBase());
-  on(qs('resetStickersBtn'), 'click', ()=> clearStickers());
-
-  on(qs('lockBaseBtn'), 'click', ()=> {
-    baseLocked = !baseLocked;
-    const o = baseGroup._objects[0];
-    if (o) {
-      o.set({ selectable: !baseLocked, hasControls: !baseLocked });
-      canvas.discardActiveObject(); canvas.renderAll();
-    }
-  });
-
-  // Ring restore (if deleted)
-  on(qs('showRingBtn'), 'click', ()=> { if(!frameImg) loadRing(); });
-
-  on(qs('downloadBtn'), 'click', downloadPng);
-
-  populateStickers();
-}
-
-function loadRing(){
-  // Absolute path for Vercel static hosting
-  fabric.Image.fromURL('/public/ring.png?v=1', img => {
-    img.set({
-      originX:'center', originY:'center', left:CENTER, top:CENTER,
-      // Fixed: cannot move/scale/rotate, but selectable (so user can delete)
-      selectable: true, hasControls: false,
-      lockMovementX: true, lockMovementY: true,
-      lockScalingX: true, lockScalingY: true,
-      lockRotation: true,
-      name: 'RING_FRAME',
-      transparentCorners: false, cornerColor: '#7c3aed', borderColor: '#7c3aed'
-    });
-    img.scaleToWidth(CANVAS_SIZE);
-
-    const hole = new fabric.Circle({
-      radius: RING_INNER_RADIUS, left: CENTER, top: CENTER,
-      originX:'center', originY:'center', absolutePositioned:true
-    });
-    hole.inverted = true;
-    img.clipPath = hole;
-
-    if (frameImg) canvas.remove(frameImg);
-    frameImg = img;
-    canvas.add(img);
-    canvas.bringToFront(img);
-    canvas.discardActiveObject();
-    canvas.renderAll();
-  }, { crossOrigin: 'anonymous' });
-}
-
-function openDrawer(open){
-  const d=qs('stickerDrawer'), s=qs('scrim');
-  if(open){ d.classList.add('open'); s.classList.add('show'); } 
-  else { d.classList.remove('open'); s.classList.remove('show'); }
-}
-
-function clearBase(){
-  const items = baseGroup._objects.slice();
-  items.forEach(o => baseGroup.remove(o));
-  canvas.discardActiveObject(); canvas.renderAll();
-}
-
-function clearStickers(){
-  stickers.forEach(o => canvas.remove(o));
-  stickers = [];
-  canvas.discardActiveObject(); canvas.renderAll();
-}
-
-function coverFit(obj){
-  if(!obj.width || !obj.height) return;
-  const scale = Math.max((RADIUS*2)/obj.width, (RADIUS*2)/obj.height) * BLEED;
-  obj.set({ originX:'center', originY:'center', left:CENTER, top:CENTER });
-  obj.scale(scale);
-}
-
-function setBase(url){
-  return new Promise(res=>{
-    fabric.Image.fromURL(url, img => {
-      img.set({
-        originX:'center', originY:'center', left:CENTER, top:CENTER,
-        hasControls: !baseLocked, selectable: !baseLocked,
-        cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false
-      });
+    const url = URL.createObjectURL(f);
+    fabric.Image.fromURL(url, img=>{
       coverFit(img);
+      img.set({ selectable:!baseLocked, hasControls:!baseLocked, cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false });
       clearBase();
       baseGroup.addWithUpdate(img);
       canvas.setActiveObject(img);
       canvas.renderAll();
-      res();
-    }, { crossOrigin: 'anonymous' });
+    }, {crossOrigin:'anonymous'});
+  });
+  $('lockBase').addEventListener('click', ()=>{
+    baseLocked=!baseLocked;
+    const o = baseGroup._objects[0];
+    if(o){ o.set({ selectable:!baseLocked, hasControls:!baseLocked }); canvas.discardActiveObject(); canvas.renderAll(); }
+  });
+  $('clearBase').addEventListener('click', ()=> clearBase());
+
+  // ring handlers
+  $('restoreRing').addEventListener('click', ()=>{ if(!frameImg) addRing(); });
+  $('removeRing').addEventListener('click', ()=>{ if(frameImg){ canvas.remove(frameImg); frameImg=null; canvas.renderAll(); }});
+
+  // stickers
+  const list=[
+    './assets/stickers/fedora.png',
+    './assets/stickers/glasses.png',
+    './assets/stickers/brooch.png',
+    './assets/stickers/mask.png',
+    './assets/stickers/tie.png',
+    './assets/stickers/bow.png',
+  ];
+  const thumbs=$('thumbs');
+  list.forEach(src=>{
+    const t=document.createElement('div'); t.className='thumb';
+    const img=document.createElement('img'); img.src=src; img.alt=src;
+    t.appendChild(img);
+    t.addEventListener('click', ()=> addSticker(src));
+    thumbs.appendChild(t);
+  });
+  $('clearStickers').addEventListener('click', ()=>{ stickers.forEach(s=>canvas.remove(s)); stickers=[]; canvas.renderAll(); });
+
+  // download
+  $('download').addEventListener('click', ()=>{
+    canvas.discardActiveObject(); canvas.renderAll();
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL({format:'png'});
+    a.download='kindred-pfp.png'; a.click();
   });
 }
 
-// Stickers: free transform (move/rotate/scale), clipped to circle
-function addSticker(url){
-  return new Promise(res=>{
-    fabric.Image.fromURL(url, img => {
-      img.set({
-        originX:'center', originY:'center', left:CENTER, top:CENTER,
-        selectable: true, hasControls: true,
-        cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false
-      });
-      img.clipPath = clipCircle.clone();
-      img.scaleToWidth(200);
-      stickers.push(img);
-      canvas.add(img);
-      if (frameImg) canvas.bringToFront(frameImg);
-      canvas.setActiveObject(img);
-      canvas.renderAll();
-      res();
-    }, { crossOrigin: 'anonymous' });
-  });
+function coverFit(obj){
+  const scale = Math.max((RADIUS*2)/obj.width, (RADIUS*2)/obj.height) * 1.02;
+  obj.set({ originX:'center', originY:'center', left:CENTER, top:CENTER });
+  obj.scale(scale);
 }
 
-function downloadPng(){
-  const sel = canvas.getActiveObject();
+function clearBase(){
+  baseGroup._objects.slice().forEach(o=> baseGroup.remove(o));
   canvas.discardActiveObject(); canvas.renderAll();
-  const dataURL = canvas.toDataURL({ format:'png' });
-  const a = document.createElement('a');
-  a.href = dataURL; a.download = 'kindred-pfp.png'; a.click();
-  if(sel) canvas.setActiveObject(sel);
 }
 
-// Absolute paths for public assets
-const STICKERS = {
-  hats:     [ "/public/stickers/fedora.png" ],
-  glasses:  [ "/public/stickers/glasses.png" ],
-  others:   [ "/public/stickers/brooch.png", "/public/stickers/mask.png", "/public/stickers/tie.png", "/public/stickers/bow.png" ]
-};
-
-function addThumb(containerId, url){
-  const cont = qs(containerId);
-  const div = document.createElement('div'); div.className='thumb'; div.title=url;
-  const img = document.createElement('img'); img.alt=url; img.src=url;
-  img.addEventListener('error', () => { div.classList.add('err'); div.title = 'Load error: ' + url; });
-  div.appendChild(img);
-  div.addEventListener('click', () => addSticker(url));
-  cont.appendChild(div);
+function addRing(){
+  fabric.Image.fromURL('./assets/ring.png', img=>{
+    img.set({
+      originX:'center', originY:'center', left:CENTER, top:CENTER,
+      selectable:true, hasControls:false,
+      lockMovementX:true, lockMovementY:true, lockScalingX:true, lockScalingY:true, lockRotation:true,
+      name:'RING'
+    });
+    // inner hole
+    const hole = new fabric.Circle({ radius:INNER, left:CENTER, top:CENTER, originX:'center', originY:'center', absolutePositioned:true });
+    hole.inverted = true; img.clipPath = hole;
+    img.scaleToWidth(SIZE);
+    frameImg && canvas.remove(frameImg);
+    frameImg = img; canvas.add(img); canvas.bringToFront(img); canvas.renderAll();
+  }, {crossOrigin:'anonymous'});
 }
 
-function populateStickers(){
-  STICKERS.hats.forEach(u=>addThumb('hatThumbs', u));
-  STICKERS.glasses.forEach(u=>addThumb('glassesThumbs', u));
-  STICKERS.others.forEach(u=>addThumb('othersThumbs', u));
+function addSticker(url){
+  fabric.Image.fromURL(url, img=>{
+    img.set({
+      originX:'center', originY:'center', left:CENTER, top:CENTER,
+      selectable:true, hasControls:true, cornerColor:'#7c3aed', borderColor:'#7c3aed', transparentCorners:false
+    });
+    // clip sticker to circle
+    const clip = new fabric.Circle({ radius:RADIUS, left:CENTER, top:CENTER, originX:'center', originY:'center', absolutePositioned:true });
+    img.clipPath = clip;
+    img.scaleToWidth(220);
+    stickers.push(img);
+    canvas.add(img);
+    if(frameImg) canvas.bringToFront(frameImg);
+    canvas.setActiveObject(img);
+    canvas.renderAll();
+  }, {crossOrigin:'anonymous'});
 }
