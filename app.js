@@ -1,3 +1,4 @@
+// filename: app.js
 document.addEventListener('DOMContentLoaded', () => initApp());
 
 const CANVAS_SIZE = 500;
@@ -18,8 +19,14 @@ function qs(id){ return document.getElementById(id); }
 function on(el, ev, fn){ el && el.addEventListener(ev, fn); }
 
 function initApp(){
+  // 👇 [추가] 캔버스 실제 픽셀 크기 지정 + 미리보기용 DOM 배경(내보내기에는 영향 없음)
+  const el = document.getElementById('pfp');
+  el.width = CANVAS_SIZE;
+  el.height = CANVAS_SIZE;
+  el.style.background = '#ffffff'; // 미리보기만 하양(내보내기 PNG는 투명 유지)
+
   canvas = new fabric.Canvas('pfp', {
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent', // PNG 투명 유지
     selection: true,
     preserveObjectStacking: true,
   });
