@@ -1,47 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kindred-style PFP — Clean</title>
-  <link rel="stylesheet" href="./style.css" />
-  <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
+  <title>Kindred PFP (Fixed)</title>
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Kindred-style PFP — Clean</h1>
+    <h1>Kindred-style PFP Builder</h1>
     <p class="sub">Made by showshow (@wshowshow)</p>
   </header>
 
   <main class="layout">
     <section class="stage">
       <canvas id="c" width="500" height="500"></canvas>
-      <p class="hint">500×500 투명 PNG로 저장됩니다.</p>
+      <p class="hint">500×500 PNG 다운로드 가능</p>
     </section>
+
     <aside class="panel">
       <div class="group">
-        <label class="label">베이스 이미지 (Base)</label>
+        <label class="label">베이스 이미지</label>
         <input id="baseInput" type="file" accept="image/*" />
         <div class="row">
           <button id="lockBase" class="btn">베이스 잠금/해제</button>
-          <button id="clearBase" class="btn ghost">베이스 초기화</button>
+          <button id="clearBase" class="btn ghost">초기화</button>
         </div>
       </div>
 
       <div class="group">
-        <label class="label">링 (Ring)</label>
+        <label class="label">링</label>
         <div class="row">
           <button id="restoreRing" class="btn">링 보이기</button>
           <button id="removeRing" class="btn ghost">링 지우기</button>
         </div>
-        <p class="note">링은 기본 표시 & 고정(이동/회전/스케일 불가). 필요 시 지울 수 있습니다.</p>
       </div>
 
       <div class="group">
-        <label class="label">스티커 (Stickers)</label>
+        <label class="label">스티커</label>
         <div id="thumbs" class="thumbs"></div>
         <div class="row">
-          <button id="clearStickers" class="btn ghost">스티커 모두 제거</button>
+          <button id="clearStickers" class="btn ghost">모두 제거</button>
         </div>
       </div>
 
@@ -49,10 +48,13 @@
         <button id="download" class="btn primary full">PNG 다운로드</button>
       </div>
 
-      <div class="small">제작자 링크: <a href="https://x.com/wshowshow" target="_blank">@wshowshow</a></div>
+      <p class="small">제작자 링크: <a href="https://x.com/wshowshow" target="_blank">@wshowshow</a></p>
     </aside>
   </main>
 
-  <script src="./app.js"></script>
+  <!-- fabric.js 먼저 -->
+  <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
+  <!-- app.js 나중 -->
+  <script src="/app.js"></script>
 </body>
 </html>
