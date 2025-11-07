@@ -1,4 +1,3 @@
-// ==== Bootstrap
 document.addEventListener('DOMContentLoaded', () => initApp());
 
 const CANVAS_SIZE = 500;
@@ -9,12 +8,11 @@ const DIAM = RADIUS * 2;
 const BLEED = 1.02;
 
 let canvas;
-let baseGroup;           // base image (clipped)
-let stickers = [];       // stickers as separate objects
-let frameImg = null;     // ring
-let ringLocked = true;   // locked by default
+let baseGroup;
+let stickers = [];
+let frameImg = null;
 let baseLocked = false;
-let clipCircle;          // reusable clip circle
+let clipCircle;
 
 function qs(id){ return document.getElementById(id); }
 function on(el, ev, fn){ el && el.addEventListener(ev, fn); }
@@ -40,6 +38,7 @@ function initApp(){
   baseGroup.set({ clipPath: clipCircle.clone() });
   canvas.add(baseGroup);
 
+  // Ring visible by default (fixed)
   loadRing();
 
   const delBtn = qs('deleteBtn');
@@ -58,9 +57,8 @@ function initApp(){
 
   on(qs('deleteBtn'), 'click', ()=> {
     const act = canvas.getActiveObject(); if(!act) return;
-    if (act === frameImg && ringLocked) return;
 
-    if (act === frameImg) {
+    if (act === frameImg) {                 // ring deletion allowed
       canvas.remove(frameImg); frameImg = null;
     } else if (baseGroup && baseGroup.contains(act)) {
       if (baseLocked) return;
@@ -86,20 +84,8 @@ function initApp(){
     }
   });
 
-  on(qs('hideRingBtn'), 'click', ()=> { if(frameImg){ canvas.remove(frameImg); frameImg = null; } });
+  // Ring restore (if deleted)
   on(qs('showRingBtn'), 'click', ()=> { if(!frameImg) loadRing(); });
-  on(qs('unlockRingBtn'), 'click', ()=> {
-    if(!frameImg) return;
-    ringLocked = false;
-    frameImg.set({
-      selectable: true, hasControls: true,
-      lockMovementX: false, lockMovementY: false,
-      lockScalingX: false, lockScalingY: false,
-      lockRotation: false
-    });
-    canvas.setActiveObject(frameImg); canvas.renderAll();
-  });
-  on(qs('resetRingBtn'), 'click', ()=> { ringLocked = true; loadRing(); });
 
   on(qs('downloadBtn'), 'click', downloadPng);
 
@@ -107,13 +93,14 @@ function initApp(){
 }
 
 function loadRing(){
-  fabric.Image.fromURL('ring.png?v=1', img => {
+  fabric.Image.fromURL('ring.png?v=6', img => {
     img.set({
       originX:'center', originY:'center', left:CENTER, top:CENTER,
-      selectable: !ringLocked, hasControls: !ringLocked,
-      lockMovementX: ringLocked, lockMovementY: ringLocked,
-      lockScalingX: ringLocked, lockScalingY: ringLocked,
-      lockRotation: ringLocked,
+      // Fixed: cannot move/scale/rotate, but selectable (so user can delete)
+      selectable: true, hasControls: false,
+      lockMovementX: true, lockMovementY: true,
+      lockScalingX: true, lockScalingY: true,
+      lockRotation: true,
       name: 'RING_FRAME',
       transparentCorners: false, cornerColor: '#7c3aed', borderColor: '#7c3aed'
     });
@@ -174,10 +161,11 @@ function setBase(url){
       canvas.setActiveObject(img);
       canvas.renderAll();
       res();
-    }, { crossOrigin:'anonymous' });
+    }, { crossOrigin: 'anonymous' });
   });
 }
 
+// Stickers: free transform (move/rotate/scale), clipped to circle
 function addSticker(url){
   return new Promise(res=>{
     fabric.Image.fromURL(url, img => {
@@ -194,7 +182,7 @@ function addSticker(url){
       canvas.setActiveObject(img);
       canvas.renderAll();
       res();
-    }, { crossOrigin:'anonymous' });
+    }, { crossOrigin: 'anonymous' });
   });
 }
 
