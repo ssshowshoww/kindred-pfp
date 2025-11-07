@@ -1,28 +1,27 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kindred-style PFP — Stickers Panel · showshow(@wshowshow)</title>
+  <title>Kindred-style PFP — Locked Ring + Stickers · showshow(@wshowshow)</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://unpkg.com/fabric@5.3.0/dist/fabric.min.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <h1>Kindred-style PFP — <span class="sub">Stickers · Made by showshow(@wshowshow)</span></h1>
+    <h1>Kindred-style PFP — <span class="sub">Locked Ring + Stickers · Made by showshow(@wshowshow)</span></h1>
     <button id="toggleStickers" class="btn ghost">스티커 열기 / Stickers</button>
   </header>
 
   <main>
     <section class="canvas-wrap">
       <canvas id="pfp" width="500" height="500"></canvas>
-      <p class="hint">편집 중에는 원 바깥도 보입니다. 다운로드 시 동그랗게 잘려요. (During edit, outside the circle is visible. It will crop to a circle on download.)</p>
+      <p class="hint">편집도 원형 클립 / Edit view is circularly clipped.</p>
     </section>
 
     <section class="panel">
       <div class="row">
-        <label class="btn muted">프레임: 고정 (Fixed Frame: ring.png)</label>
+        <label class="btn muted">프레임 파일: <b>ring.png</b> (root)</label>
         <label class="btn">
           콘텐츠 이미지 추가 (Add Base Image)
           <input id="imgInput" type="file" accept="image/png,image/jpeg" hidden />
@@ -35,8 +34,13 @@
       </div>
 
       <div class="row">
-        <button id="resetBaseBtn" class="btn secondary">콘텐츠 초기화 (Reset Base)</button>
+        <button id="resetBaseBtn" className="btn secondary">콘텐츠 초기화 (Reset Base)</button>
         <button id="resetStickersBtn" class="btn secondary">스티커 초기화 (Reset Stickers)</button>
+      </div>
+
+      <div class="row">
+        <button id="unlockRingBtn" class="btn">링 잠금 해제 (Unlock Ring)</button>
+        <button id="resetRingBtn" class="btn secondary">링 초기화 (Reset Ring)</button>
       </div>
 
       <div class="row">
@@ -51,7 +55,6 @@
     </section>
   </main>
 
-  <!-- Slide-over Sticker Drawer -->
   <aside id="stickerDrawer" class="drawer">
     <div class="drawer-header">
       <h2>스티커 (Stickers)</h2>
